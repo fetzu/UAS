@@ -1,6 +1,8 @@
 ## [ IMPORTS ]
+from calendar import c
 import os
 import datetime
+from platform import node
 from binarytree import Node, build
 
 ## [ CONFIGURATION ]
@@ -17,7 +19,7 @@ if os.path.exists(SAVESDIR + "/.DS_Store"): # REMOVE THAT FUCKING DS_STORE FILE 
 ## [ FILE HANDLING FUNCTIONS ]
 def tree_load():
     """
-    Loads the latest save of the tree and returns it
+    Loads the latest save of the tree and returns it.
     """    
     # Get latest save (as in: file with higher number) from folder, load it as list and build the tree
     print(os.listdir(SAVESDIR))
@@ -29,7 +31,7 @@ def tree_load():
 
 def tree_save(tree):
     """
-    Saves the current tree to a file named YYYYMMDDHHMMSS.UAS inside the SAVESDIR folder
+    Saves the current tree to a file named YYYYMMDDHHMMSS.UAS inside the SAVESDIR folder.
     """
     # "The time for us is now"
     NOW = datetime.datetime.now()
@@ -48,41 +50,54 @@ def tree_save(tree):
 #         /                      \
 # Negative answer           Positive answer
 #
-def ask_question(nodevalue):
+def ask_question(nodepointer):
     """
-    Takes the current nodevalue (=question / position in the tree) and prompts the user for an answer.
+    Takes the current nodepointer (=question / position in the tree) and prompts the user for an answer.
     """    
-    question = TREE[nodevalue].value
+    question = TREE[nodepointer].value
     answer = input(question + " ")
-    check_answer(answer, nodevalue)
+    check_answer(answer, nodepointer)
 
-def check_answer(answer, nodevalue):
+def check_answer(answer, nodepointer):
     """
-    Takes an answer and a nodevalue (position in the tree), and checks whether the corresponding answer already exists in the tree.
+    Takes an answer and a nodepointer (position in the tree), and checks whether the corresponding answer already exists in the tree.
     If the answer does not exist, asks the user why to create a new node.
     If it does, asks the corresponding/next question/move further down the tree.
     """    
     if answer in POSITIVEANSWERS:
-        if (nodevalue + 2) is None:
-            print("Does not Exist") #TODEL
-        else:
-            print("Does exist") #TODEL
-            ask_question(nodevalue+2)
-    if answer in NEGATIVEANSWERS:
-        if (nodevalue + 1) is None:
-            print("Does not Exist") #TODEL
-        else:
-            print("Does exist") #TODEL
-            ask_question(nodevalue+1)
+        try:
+            next = TREE[nodepointer+2]
+            return ask_question((nodepointer*2)+2)
+        except:
+            return create_node(nodepointer, "right")
+    elif answer in NEGATIVEANSWERS:
+        try:
+            next = TREE[nodepointer+1]
+            return ask_question((nodepointer*2)+1)
+        except:
+            return create_node(nodepointer, "left")
+
+## [ NODE FUNCTIONS ]
+def create_node(nodepointer, direction):
+    """
+    Prompts the user for a question and creates the approriate children to the node.
+    """   
+    answer = input("Why?")
+    if direction == "right":
+        TREE[nodepointer].right = Node(answer)
+    elif direction == "left":
+        TREE[nodepointer].left = Node(answer)
+    print("Finished")
 
 ## [ MAIN ]
 # Loads latest save
 TREE = tree_load()
 
+# Launches the loop from root of tree
 ask_question(0)
 
 # Saves current tree to disk
 #tree_save(TREE)
 
 # Prints tree to console
-#print(TREE)
+print(TREE)
