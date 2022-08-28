@@ -1,16 +1,35 @@
+### [ Uniqueness Assessment System (UAS) || Made by Julien 'fetzu' Bono for Le Salon's "Bleu, Sartre et ma mère" exhibition. ]
+## [ CLI is cooler with docopt ]
+"""
+Usage: main.py [-de]
+  
+  Options:
+    -h --help
+    -d                Dev mode: shows verbose output.
+    -e                English mode.
+"""
+
 ## [ IMPORTS ]
 import os
 import datetime
-from platform import node
 from binarytree import Node, build
+from docopt import docopt
+
+# Initializing docopt
+if __name__ == '__main__':
+    arguments = docopt(__doc__)
 
 ## [ CONFIGURATION ]
+VERSION = "0.1"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets SAVESDIR path (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
 SAVESFILENAMEFORMAT = "%Y%m%d%H%M%S" # Sets save file name format (must be the same for all savefiles for the load/save mechanism to work)
 POSITIVEANSWERS = ["y", "yes", "o", "oui"]
 NEGATIVEANSWERS = ["n", "no", "non"]
-LANGUAGE = "FR"
+if arguments['-e'] is True:
+    LANGUAGE = "EN"
+else:
+    LANGUAGE = "FR"
 
 ## [ MISC ]
 if os.path.exists(SAVESDIR + "/.DS_Store"): # REMOVE THAT FUCKING DS_STORE FILE ON OS X
@@ -18,12 +37,14 @@ if os.path.exists(SAVESDIR + "/.DS_Store"): # REMOVE THAT FUCKING DS_STORE FILE 
 
 ## [ LANGUAGE / TRANSLATIONS ]
 if LANGUAGE == "FR":
+    WELCOME = f"Bienvenue dans le Uniqueness Assessment System (UAS) version {VERSION}. Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre par 'o'/'oui' ou 'n'/'non'. Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche toutes les 2 heures."
     QMORE = "Quoi d'autre te rends unique? "
     QPREFIX = "Dirais-tu que: "
-    FINISHER = "Merci. Tu es vraiment unique!"
+    FINISHER = "Merci. Vos réponses ont été sauvegardées et seront analysées."
 if LANGUAGE == "EN":
     QMORE = "What else makes you unique? "
-    FINISHER = "Thank you. You really are unique!"
+    QPREFIX = "Would you say that: "
+    FINISHER = "Thank you. Your answers have been saved and will be evaluated."
 
 ## [ FILE HANDLING FUNCTIONS ]
 def tree_load():
@@ -31,11 +52,11 @@ def tree_load():
     Loads the latest save of the tree and returns it.
     """    
     # Get latest save (as in: file with higher number) from folder, load it as list and build the tree
-    print(os.listdir(SAVESDIR))
+    #print(os.listdir(SAVESDIR))
     latest_save = os.path.join(SAVESDIR, str(max([int(f[:f.index('.')]) for f in os.listdir(SAVESDIR)])) + ".UAS")
     tree_loaded = eval(open(latest_save, "r").read())
     tree = build(tree_loaded)
-    print(f"Successfully loaded tree from {latest_save}")
+    if arguments['-d'] is True: print(f"Successfully loaded tree from {latest_save}")
     return tree
 
 def tree_save(tree):
@@ -50,7 +71,7 @@ def tree_save(tree):
     save_file = open(save_filename, "w")
     save_file.write(str(tree.values))
     save_file.close()
-    print(f"Successfully saved current tree to {save_filename}")
+    if arguments['-d'] is True: print(f"Successfully saved current tree to {save_filename}")
 
 ## [ QUESTION/REPONSE FUNCTIONS ]
 # NOTE: A tree node is built with the following logic:
@@ -104,7 +125,9 @@ def create_node(nodepointer, direction):
 ## [ MAIN ]
 # Loads latest save
 TREE = tree_load()
-print(TREE)
+
+# Prints welcome message
+print(WELCOME)
 
 # Launches the loop from root of tree
 ask_question(0)
