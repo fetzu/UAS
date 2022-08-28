@@ -1,5 +1,4 @@
 ## [ IMPORTS ]
-from calendar import c
 import os
 import datetime
 from platform import node
@@ -9,12 +8,22 @@ from binarytree import Node, build
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets SAVESDIR path (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
 SAVESFILENAMEFORMAT = "%Y%m%d%H%M%S" # Sets save file name format (must be the same for all savefiles for the load/save mechanism to work)
-POSITIVEANSWERS = ["y", "yes"]
-NEGATIVEANSWERS = ["n", "no"]
+POSITIVEANSWERS = ["y", "yes", "o", "oui"]
+NEGATIVEANSWERS = ["n", "no", "non"]
+LANGUAGE = "FR"
 
 ## [ MISC ]
 if os.path.exists(SAVESDIR + "/.DS_Store"): # REMOVE THAT FUCKING DS_STORE FILE ON OS X
   os.remove(SAVESDIR + "/.DS_Store") 
+
+## [ LANGUAGE / TRANSLATIONS ]
+if LANGUAGE == "FR":
+    QMORE = "Quoi d'autre te rends unique? "
+    QPREFIX = "Dirais-tu que: "
+    FINISHER = "Merci. Tu es vraiment unique!"
+if LANGUAGE == "EN":
+    QMORE = "What else makes you unique? "
+    FINISHER = "Thank you. You really are unique!"
 
 ## [ FILE HANDLING FUNCTIONS ]
 def tree_load():
@@ -54,7 +63,10 @@ def ask_question(nodepointer):
     """
     Takes the current nodepointer (=question / position in the tree) and prompts the user for an answer.
     """    
-    question = TREE[nodepointer].value
+    if nodepointer == 0:
+        question = TREE[nodepointer].value
+    else:
+        question = QPREFIX + TREE[nodepointer].value + "?"
     answer = input(question + " ")
     check_answer(answer, nodepointer)
 
@@ -64,15 +76,15 @@ def check_answer(answer, nodepointer):
     If the answer does not exist, asks the user why to create a new node.
     If it does, asks the corresponding/next question/move further down the tree.
     """    
-    if answer in POSITIVEANSWERS:
+    if answer.lower() in POSITIVEANSWERS:
         try:
-            next = TREE[nodepointer+2]
+            next = TREE[(nodepointer*2)+2]
             return ask_question((nodepointer*2)+2)
         except:
             return create_node(nodepointer, "right")
-    elif answer in NEGATIVEANSWERS:
+    elif answer.lower() in NEGATIVEANSWERS:
         try:
-            next = TREE[nodepointer+1]
+            next = TREE[(nodepointer*2)+1]
             return ask_question((nodepointer*2)+1)
         except:
             return create_node(nodepointer, "left")
@@ -82,22 +94,23 @@ def create_node(nodepointer, direction):
     """
     Prompts the user for a question and creates the approriate children to the node.
     """   
-    answer = input("Why?")
+    answer = input(QMORE)
     if direction == "right":
         TREE[nodepointer].right = Node(answer)
     elif direction == "left":
         TREE[nodepointer].left = Node(answer)
-    print("Finished")
+    print(FINISHER)
 
 ## [ MAIN ]
 # Loads latest save
 TREE = tree_load()
+print(TREE)
 
 # Launches the loop from root of tree
 ask_question(0)
 
 # Saves current tree to disk
-#tree_save(TREE)
+tree_save(TREE)
 
 # Prints tree to console
-print(TREE)
+#print(TREE)
