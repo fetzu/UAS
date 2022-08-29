@@ -11,6 +11,8 @@ Usage: main.py [-de]
 
 ## [ IMPORTS ]
 import os
+import sys
+import time
 import datetime
 from binarytree import Node, build
 from docopt import docopt
@@ -40,10 +42,14 @@ if LANGUAGE == "FR":
     WELCOME = f"Bienvenue dans le Uniqueness Assessment System (UAS) version {VERSION}. Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre par 'o'/'oui' ou 'n'/'non'. Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche toutes les 2 heures."
     QMORE = "Quoi d'autre te rends unique? "
     QPREFIX = "Dirais-tu que: "
+    INVALIDINPUT = "Réponse invalide, veuillez répondre par 'o'/'oui' ou 'n'/'non'."
+    TOOMANYERRORS = "Trop d'erreurs de saisie, le programme va redémarrer."
     FINISHER = "Merci. Vos réponses ont été sauvegardées et seront analysées."
 if LANGUAGE == "EN":
     QMORE = "What else makes you unique? "
     QPREFIX = "Would you say that: "
+    INVALIDINPUT = "Invalid response. Please answer with 'y'/'yes' or 'n'/'no'."
+    TOOMANYERRORS = "Too many input errors. Application will restart."
     FINISHER = "Thank you. Your answers have been saved and will be evaluated."
 
 ## [ FILE HANDLING FUNCTIONS ]
@@ -80,16 +86,25 @@ def tree_save(tree):
 #         /                      \
 # Negative answer           Positive answer
 #
-def ask_question(nodepointer):
+def ask_question(nodepointer, errcount = 0):
     """
     Takes the current nodepointer (=question / position in the tree) and prompts the user for an answer.
+    If the input is wrong, notify the user.
+    If the user manages 3 consecutive wrong inputs, restart the session.
     """    
     if nodepointer == 0:
         question = TREE[nodepointer].value
     else:
         question = QPREFIX + TREE[nodepointer].value + "?"
     answer = input(question + " ")
-    check_answer(answer, nodepointer)
+    if answer in POSITIVEANSWERS or answer in NEGATIVEANSWERS:
+        check_answer(answer, nodepointer)
+    elif errcount == 2:
+        end_restart(1)
+    else:
+        print(INVALIDINPUT)
+        errcount += 1
+        ask_question(nodepointer, errcount)
 
 def check_answer(answer, nodepointer):
     """
@@ -110,7 +125,7 @@ def check_answer(answer, nodepointer):
         except:
             return create_node(nodepointer, "left")
 
-## [ NODE FUNCTIONS ]
+## [ OTHER FUNCTIONS ]
 def create_node(nodepointer, direction):
     """
     Prompts the user for a question and creates the approriate children to the node.
@@ -120,20 +135,41 @@ def create_node(nodepointer, direction):
         TREE[nodepointer].right = Node(answer)
     elif direction == "left":
         TREE[nodepointer].left = Node(answer)
-    print(FINISHER)
+    end_restart()
+
+def initialize():
+    """
+    Initialize the app by loading the latest save of the tree and clearing the screen.
+    """
+    TREE = tree_load()
+    os.system('clear')
+    print(WELCOME)
+    return TREE
+
+def end_restart(graceful = 0):
+    """
+    In case of a graceful finish (user made it to end of current tree and input'd what made them unique), 
+    print finish message, save tree and re-set app for next session.
+    """
+    print(FINISHER) if graceful == 0 else print(TOOMANYERRORS) 
+    tree_save(TREE)
+    time.sleep(5)
+    main()
+    
 
 ## [ MAIN ]
-# Loads latest save
-TREE = tree_load()
+def main():
+    # Initializes the session
+    global TREE 
+    TREE = initialize()
 
-# Prints welcome message
-print(WELCOME)
+    # Launches the question/response loop from root of tree
+    ask_question(0)
 
-# Launches the loop from root of tree
-ask_question(0)
+    # Saves current tree to disk
+    #tree_save(TREE)
 
-# Saves current tree to disk
-tree_save(TREE)
+    # Prints tree to console
+    #print(TREE)
 
-# Prints tree to console
-#print(TREE)
+main()
