@@ -1,7 +1,7 @@
 ### [ Uniqueness Assessment System (UAS) || Made by Julien 'fetzu' Bono for Le Salon's "Bleu, Sartre et ma mère" exhibition. ]
 ## [ CLI is cooler with docopt ]
 """
-Usage: main.py [-ders]
+Usage: main.py [-derst]
   
   Options:
     -h --help
@@ -9,6 +9,7 @@ Usage: main.py [-ders]
     -e                English mode.
     -r                Render mode. Render and show the loaded tree with graphviz.
     -s                Export mode. Export the loaded tree to a SVG file inside EXPORTSDIR.
+    -t                Tree mode. The tree is shown at the end before the screen clears.
 """
 
 ## [ IMPORTS ]
@@ -156,7 +157,7 @@ def end_restart(graceful = 0):
     """
     print(FINISHER) if graceful == 0 else print(TOOMANYERRORS) 
     tree_save(TREE)
-    print(TREE.svg())
+    if arguments['-t'] is True: print(TREE)
     time.sleep(5)
     main()
 
@@ -164,7 +165,7 @@ def render_tree():
     """
     Renders the tree with GraphViz.
     """
-    graph = TREE.graphviz()
+    graph = TREE.graphviz(node_attr={'shape': 'record', 'height': '.1'})
     graph.body
     graph.render()
     graph.view()
