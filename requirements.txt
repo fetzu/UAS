@@ -1,2 +1,4 @@
 binarytree==6.5.1
 docopt==0.6.2
+graphviz==0.20.1
+readchar==4.0.2

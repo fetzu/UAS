@@ -17,6 +17,7 @@ import os
 import sys
 import time
 import datetime
+import readchar
 from binarytree import Node, build
 from docopt import docopt
 
@@ -43,16 +44,16 @@ if os.path.exists(SAVESDIR + "/.DS_Store"): # REMOVE THAT FUCKING DS_STORE FILE 
 
 ## [ LANGUAGE / TRANSLATIONS ]
 if LANGUAGE == "FR":
-    WELCOME = f"Bienvenue dans le Uniqueness Assessment System (UAS) version {VERSION}. Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre par 'o'/'oui' ou 'n'/'non'. Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche toutes les 2 heures."
+    WELCOME = f"Bienvenue dans le Uniqueness Assessment System (UAS) version {VERSION}. Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre en pressant 'o' (pour oui)' ou 'n' (pour non). Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche toutes les 2 heures."
     QMORE = "Quoi d'autre te rends unique? "
     QPREFIX = "Dirais-tu que: "
-    INVALIDINPUT = "Réponse invalide, veuillez répondre par 'o'/'oui' ou 'n'/'non'."
+    INVALIDINPUT = "Réponse invalide, veuillez répondre en pressant 'o' (pour oui) ou 'n' (pour non)."
     TOOMANYERRORS = "Trop d'erreurs de saisie, le programme va redémarrer."
     FINISHER = "Merci. Vos réponses ont été sauvegardées et seront analysées."
 if LANGUAGE == "EN":
     QMORE = "What else makes you unique? "
     QPREFIX = "Would you say that: "
-    INVALIDINPUT = "Invalid response. Please answer with 'y'/'yes' or 'n'/'no'."
+    INVALIDINPUT = "Invalid response. Please answer with 'y' (for yes) or 'n' (for no)."
     TOOMANYERRORS = "Too many input errors. Application will restart."
     FINISHER = "Thank you. Your answers have been saved and will be evaluated."
 
@@ -100,7 +101,9 @@ def ask_question(nodepointer, errcount = 0):
         question = TREE[nodepointer].value
     else:
         question = QPREFIX + TREE[nodepointer].value + "?"
-    answer = input(question + " ")
+    #answer = input(question + " ") # "simple" prompt, does allow any number of strings and user must press ENTER
+    print(question)
+    answer = readchar.readchar()
     if answer in POSITIVEANSWERS or answer in NEGATIVEANSWERS:
         check_answer(answer, nodepointer)
     elif errcount == 2:
