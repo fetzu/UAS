@@ -1,12 +1,14 @@
 ### [ Uniqueness Assessment System (UAS) || Made by Julien 'fetzu' Bono for Le Salon's "Bleu, Sartre et ma mère" exhibition. ]
 ## [ CLI is cooler with docopt ]
 """
-Usage: main.py [-de]
+Usage: main.py [-ders]
   
   Options:
     -h --help
     -d                Dev mode: shows verbose output.
     -e                English mode.
+    -r                Render mode. Render and show the loaded tree with graphviz.
+    -s                Export mode. Export the loaded tree to a SVG file inside EXPORTSDIR.
 """
 
 ## [ IMPORTS ]
@@ -24,7 +26,8 @@ if __name__ == '__main__':
 ## [ CONFIGURATION ]
 VERSION = "0.1"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
-SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets SAVESDIR path (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
+EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
+SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets directory for saves (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
 SAVESFILENAMEFORMAT = "%Y%m%d%H%M%S" # Sets save file name format (must be the same for all savefiles for the load/save mechanism to work)
 POSITIVEANSWERS = ["y", "yes", "o", "oui"]
 NEGATIVEANSWERS = ["n", "no", "non"]
@@ -67,7 +70,7 @@ def tree_load():
 
 def tree_save(tree):
     """
-    Saves the current tree to a file named YYYYMMDDHHMMSS.UAS inside the SAVESDIR folder.
+    Saves the current tree to a file named according to SAVESFILENAMEFORMAT inside the SAVESDIR folder.
     """
     # "The time for us is now"
     NOW = datetime.datetime.now()
@@ -153,15 +156,42 @@ def end_restart(graceful = 0):
     """
     print(FINISHER) if graceful == 0 else print(TOOMANYERRORS) 
     tree_save(TREE)
+    print(TREE.svg())
     time.sleep(5)
     main()
-    
+
+def render_tree():
+    """
+    Renders the tree with GraphViz.
+    """
+    graph = TREE.graphviz()
+    graph.body
+    graph.render()
+    graph.view()
+
+def render_svg():
+    """
+    Renders the tree as SVG to a file named according to SAVESFILENAMEFORMAT inside the EXPORTS folder.
+    """
+    # "The time for us is now"
+    NOW = datetime.datetime.now()
+    # Format the time according to config
+    svg_filename = os.path.join(EXPORTSDIR, NOW.strftime(SAVESFILENAMEFORMAT) + ".SVG")
+    # Create the file, save current tree inside and close
+    save_file = open(svg_filename, "w")
+    save_file.write(TREE.svg())
+    save_file.close()
+    if arguments['-d'] is True: print(f"Successfully exported svg of current tree to {svg_filename}")
 
 ## [ MAIN ]
 def main():
     # Initializes the session
     global TREE 
     TREE = initialize()
+
+    # If argument "-r" or "-s" have been passed, render the tree accordingly
+    if arguments['-r'] is True: render_tree()
+    if arguments['-s'] is True: render_svg()
 
     # Launches the question/response loop from root of tree
     ask_question(0)
