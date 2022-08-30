@@ -26,7 +26,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
 ## [ CONFIGURATION ]
-VERSION = "0.1"
+VERSION = "0.7"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
 SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets directory for saves (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
