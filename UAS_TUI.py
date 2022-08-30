@@ -29,7 +29,7 @@ if __name__ == '__main__':
 term = Terminal()
 
 ## [ CONFIGURATION ]
-VERSION = "0.8"
+VERSION = "0.8.1-TUI"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
 SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets directory for saves (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
@@ -154,7 +154,7 @@ def initialize():
     """
     TREE = tree_load()
     print(term.home + term.on_dodgerblue3 + term.clear)
-    print(term.white_on_black(term.rjust(f"UAS v{VERSION}")))
+    print(term.white_on_black(term.rjust(f"Uniqueness Assessment System (UAS) v{VERSION}")))
     print(term.white_on_dodgerblue3(" "))
     print(term.white_on_dodgerblue3(term.bold(WELCOME)))
     print(term.white_on_dodgerblue3(" "))
