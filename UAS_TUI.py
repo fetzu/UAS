@@ -1,7 +1,7 @@
 ### [ Uniqueness Assessment System (UAS) || Made by Julien 'fetzu' Bono for Le Salon's "Bleu, Sartre et ma mère" exhibition. ]
 ## [ CLI is cooler with docopt ]
 """
-Usage: UAS_TUI.py [-derst]
+Usage: UAS_TUI.py [-derst8]
   
   Options:
     -h --help
@@ -10,6 +10,7 @@ Usage: UAS_TUI.py [-derst]
     -r                Render mode. Render and show the loaded tree with graphviz.
     -s                Export mode. Export the loaded tree to a SVG file inside EXPORTSDIR.
     -t                Tree mode. The tree is shown at the end before the screen clears.
+    -8                8 bit mode. Because we lovy TTY.
 """
 
 ## [ IMPORTS ]
@@ -29,7 +30,7 @@ if __name__ == '__main__':
 term = Terminal()
 
 ## [ CONFIGURATION ]
-VERSION = "0.8.1-TUI"
+VERSION = "0.8.2-TUI"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
 SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets directory for saves (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
@@ -105,7 +106,7 @@ def ask_question(nodepointer, errcount = 0):
     else:
         question = QPREFIX + TREE[nodepointer].value + "?"
     with term.hidden_cursor():
-        print(term.white_on_dodgerblue3((question)))
+        print(termprint((question)))
         with term.cbreak():
             answer = term.inkey()
     if answer in POSITIVEANSWERS or answer in NEGATIVEANSWERS:
@@ -113,7 +114,7 @@ def ask_question(nodepointer, errcount = 0):
     elif errcount == 2:
         end_restart(1)
     else:
-        print(term.white_on_dodgerblue3((INVALIDINPUT)))
+        print(termprint((INVALIDINPUT)))
         errcount += 1
         ask_question(nodepointer, errcount)
 
@@ -141,7 +142,7 @@ def create_node(nodepointer, direction):
     """
     Prompts the user for a question and creates the approriate children to the node.
     """   
-    answer = input(term.white_on_dodgerblue3(QMORE))
+    answer = input(termprint(QMORE))
     if direction == "right":
         TREE[nodepointer].right = Node(answer)
     elif direction == "left":
@@ -153,11 +154,11 @@ def initialize():
     Initialize the app by loading the latest save of the tree and clearing the screen.
     """
     TREE = tree_load()
-    print(term.home + term.on_dodgerblue3 + term.clear)
+    print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
     print(term.white_on_black(term.rjust(f"Uniqueness Assessment System (UAS) v{VERSION}")))
-    print(term.white_on_dodgerblue3(" "))
-    print(term.white_on_dodgerblue3(term.bold(WELCOME)))
-    print(term.white_on_dodgerblue3(" "))
+    print(termprint(" "))
+    print(termprint(term.bold(WELCOME)))
+    print(termprint(" "))
     return TREE
 
 def end_restart(graceful = 0):
@@ -165,11 +166,20 @@ def end_restart(graceful = 0):
     In case of a graceful finish (user made it to end of current tree and input'd what made them unique), 
     print finish message, save tree and re-set app for next session.
     """
-    print(term.white_on_dodgerblue3((FINISHER))) if graceful == 0 else print(term.white_on_dodgerblue3((TOOMANYERRORS)))
+    print(termprint((FINISHER))) if graceful == 0 else print(termprint((TOOMANYERRORS)))
     tree_save(TREE)
     if arguments['-t'] is True: print(TREE)
     time.sleep(5)
     main()
+
+def termprint(arg):
+    """
+    Print in color according to the argument "-8". Default to 24-bit colors, "16 colors" if -8 is passed.
+    """
+    if arguments['-8'] is True:
+        return term.white_on_blue(arg)
+    else:
+        return term.white_on_dodgerblue3(arg)
 
 def render_tree():
     """
