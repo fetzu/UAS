@@ -30,7 +30,7 @@ if __name__ == '__main__':
 term = Terminal()
 
 ## [ CONFIGURATION ]
-VERSION = "1.0.0-TUI"
+VERSION = "1.0.1-TUI"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
 GRAPHDIR = os.path.join(ROOTDIR, 'GRAPH', 'TREE') # Sets directory for graphviz export(s)
