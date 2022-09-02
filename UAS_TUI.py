@@ -30,9 +30,10 @@ if __name__ == '__main__':
 term = Terminal()
 
 ## [ CONFIGURATION ]
-VERSION = "0.8.4-TUI"
+VERSION = "1.0.0-TUI"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
+GRAPHDIR = os.path.join(ROOTDIR, 'GRAPH', 'TREE') # Sets directory for graphviz export(s)
 SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets directory for saves (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
 SAVESFILENAMEFORMAT = "%Y%m%d%H%M%S" # Sets save file name format (must be the same for all savefiles for the load/save mechanism to work)
 POSITIVEANSWERS = ["y", "yes", "o", "oui"]
@@ -214,8 +215,8 @@ def render_tree():
     """
     graph = TREE.graphviz(node_attr={'shape': 'record', 'height': '.1'})
     graph.body
-    graph.render()
-    graph.view()
+    graph.render(GRAPHDIR, format='png')
+    #graph.view()
 
 def render_svg():
     """
