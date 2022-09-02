@@ -48,6 +48,7 @@ if os.path.exists(SAVESDIR + "/.DS_Store"): # REMOVE THAT FUCKING DS_STORE FILE 
 
 ## [ LANGUAGE / TRANSLATIONS ]
 if LANGUAGE == "FR":
+    ENTERTHEBLUE = "Pressez une touche pour commencer."
     WELCOME = f"Bienvenue dans le Uniqueness Assessment System (UAS) version {VERSION}. Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre en pressant 'o' (pour oui)' ou 'n' (pour non). Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche toutes les 2 heures."
     QMORE = "Quoi d'autre te rends unique? "
     QPREFIX = "Dirais-tu que: "
@@ -55,6 +56,8 @@ if LANGUAGE == "FR":
     TOOMANYERRORS = "Trop d'erreurs de saisie, le programme va redémarrer."
     FINISHER = "Merci. Vos réponses ont été sauvegardées et seront analysées."
 if LANGUAGE == "EN":
+    ENTERTHEBLUE = "Press any key to start."
+    WELCOME = "PLACEHOLDER"
     QMORE = "What else makes you unique? "
     QPREFIX = "Would you say that: "
     INVALIDINPUT = "Invalid response. Please answer with 'y' (for yes) or 'n' (for no)."
@@ -149,6 +152,19 @@ def create_node(nodepointer, direction):
         TREE[nodepointer].left = Node(answer)
     end_restart()
 
+def splashscreen():
+    """
+    Show the splashscreen and wait for enter to initialize
+    """
+    print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
+    with term.location(y=term.height // 2):
+        print(termprint(term.center(term.bold(ENTERTHEBLUE))))
+    with term.hidden_cursor():
+        with term.cbreak():
+            keypress = term.inkey()
+    if keypress == term.KEY_ENTER:
+        return
+
 def initialize():
     """
     Initialize the app by loading the latest save of the tree and clearing the screen.
@@ -206,8 +222,11 @@ def render_svg():
 
 ## [ MAIN ]
 def main():
+    # Show splash screen
+    splashscreen()
+
     # Initializes the session (incl. TUI)
-    global TREE 
+    global TREE
     TREE = initialize()
 
     # If argument "-r" or "-s" have been passed, render the tree accordingly
