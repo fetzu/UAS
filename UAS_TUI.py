@@ -30,7 +30,7 @@ if __name__ == '__main__':
 term = Terminal()
 
 ## [ CONFIGURATION ]
-VERSION = "0.8.2-TUI"
+VERSION = "0.8.4-TUI"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
 SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets directory for saves (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
@@ -49,20 +49,23 @@ if os.path.exists(SAVESDIR + "/.DS_Store"): # REMOVE THAT FUCKING DS_STORE FILE 
 ## [ LANGUAGE / TRANSLATIONS ]
 if LANGUAGE == "FR":
     ENTERTHEBLUE = "Pressez une touche pour commencer."
-    WELCOME = f"Bienvenue dans le Uniqueness Assessment System (UAS) version {VERSION}. Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre en pressant 'o' (pour oui)' ou 'n' (pour non). Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche toutes les 2 heures."
-    QMORE = "Quoi d'autre te rends unique? "
-    QPREFIX = "Dirais-tu que: "
+    WELCOME = "Bienvenue dans le Uniqueness Assessment System (UAS). Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre en pressant 'o' (pour oui)' ou 'n' (pour non). Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche ultérieurement."
+    QMORE = "Quoi d'autre vous rends unique? "
+    QPREFIX = "Diriez-vous que: "
     INVALIDINPUT = "Réponse invalide, veuillez répondre en pressant 'o' (pour oui) ou 'n' (pour non)."
     TOOMANYERRORS = "Trop d'erreurs de saisie, le programme va redémarrer."
     FINISHER = "Merci. Vos réponses ont été sauvegardées et seront analysées."
 if LANGUAGE == "EN":
     ENTERTHEBLUE = "Press any key to start."
-    WELCOME = "PLACEHOLDER"
+    WELCOME = "Welcome to the Uniqueness Assessment System (UAS). The system will ask you a series of questions to evaluate your uniqueness, please answer by pressing 'y' (for yes) or 'n' (for no). Your answers will be saved and added to the tree on your left later."
     QMORE = "What else makes you unique? "
     QPREFIX = "Would you say that: "
     INVALIDINPUT = "Invalid response. Please answer with 'y' (for yes) or 'n' (for no)."
     TOOMANYERRORS = "Too many input errors. Application will restart."
     FINISHER = "Thank you. Your answers have been saved and will be evaluated."
+
+# Wrap the long welcome texts
+WELCOMEWARP = term.wrap(WELCOME)
 
 ## [ FILE HANDLING FUNCTIONS ]
 def tree_load():
@@ -173,7 +176,7 @@ def initialize():
     print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
     print(term.white_on_black(term.rjust(f"Uniqueness Assessment System (UAS) v{VERSION}")))
     print(termprint(" "))
-    print(termprint(term.bold(WELCOME)))
+    for line in WELCOMEWARP: print(line)
     print(termprint(" "))
     return TREE
 
@@ -182,10 +185,18 @@ def end_restart(graceful = 0):
     In case of a graceful finish (user made it to end of current tree and input'd what made them unique), 
     print finish message, save tree and re-set app for next session.
     """
-    print(termprint((FINISHER))) if graceful == 0 else print(termprint((TOOMANYERRORS)))
-    tree_save(TREE)
-    if arguments['-t'] is True: print(TREE)
-    time.sleep(5)
+    if graceful == 0:
+        tree_save(TREE)
+        if arguments['-t'] is True: print(TREE)
+        print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
+        with term.location(y=term.height // 2):
+            print(termprint(term.center(term.bold(FINISHER))))
+        with term.hidden_cursor():
+            time.sleep(10)
+    else: 
+        print(termprint((TOOMANYERRORS)))
+        with term.hidden_cursor():
+            time.sleep(10)
     main()
 
 def termprint(arg):
