@@ -1,7 +1,7 @@
 ### [ Uniqueness Assessment System (UAS) || Made by Julien 'fetzu' Bono for Le Salon's "Bleu, Sartre et ma mère" exhibition. ]
 ## [ CLI is cooler with docopt ]
 """
-Usage: main.py [-derst]
+Usage: UAS_CLI.py [-derst]
   
   Options:
     -h --help
@@ -10,6 +10,7 @@ Usage: main.py [-derst]
     -r                Render mode. Render and show the loaded tree with graphviz.
     -s                Export mode. Export the loaded tree to a SVG file inside EXPORTSDIR.
     -t                Tree mode. The tree is shown at the end before the screen clears.
+    -8                8 bit mode. Because we lovy TTY.
 """
 
 ## [ IMPORTS ]
@@ -26,7 +27,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
 ## [ CONFIGURATION ]
-VERSION = "0.8.1-CLI"
+VERSION = "1.0.2-CLI"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
 SAVESDIR = os.path.join(ROOTDIR, 'SAVES') # Sets directory for saves (NOTE: This folder should contain ONLY saves with ".UAS" extensions)
@@ -44,13 +45,17 @@ if os.path.exists(SAVESDIR + "/.DS_Store"): # REMOVE THAT FUCKING DS_STORE FILE 
 
 ## [ LANGUAGE / TRANSLATIONS ]
 if LANGUAGE == "FR":
-    WELCOME = f"Bienvenue dans le Uniqueness Assessment System (UAS) version {VERSION}. Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre en pressant 'o' (pour oui)' ou 'n' (pour non). Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche toutes les 2 heures."
-    QMORE = "Quoi d'autre te rends unique? "
-    QPREFIX = "Dirais-tu que: "
+    ENTERTHEBLUE = "Pressez une touche pour commencer."
+    WELCOME = "Bienvenue dans le Uniqueness Assessment System (UAS). Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre en pressant 'o' (pour oui)' ou 'n' (pour non). Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche ultérieurement."
+    QMORE = "Quoi d'autre vous rends unique? "
+    QPREFIX = "Diriez-vous que "
+    QSUFFIX = " vous rends unique?"
     INVALIDINPUT = "Réponse invalide, veuillez répondre en pressant 'o' (pour oui) ou 'n' (pour non)."
     TOOMANYERRORS = "Trop d'erreurs de saisie, le programme va redémarrer."
     FINISHER = "Merci. Vos réponses ont été sauvegardées et seront analysées."
 if LANGUAGE == "EN":
+    ENTERTHEBLUE = "Press any key to start."
+    WELCOME = "Welcome to the Uniqueness Assessment System (UAS). The system will ask you a series of questions to evaluate your uniqueness, please answer by pressing 'y' (for yes) or 'n' (for no). Your answers will be saved and added to the tree on your left later."
     QMORE = "What else makes you unique? "
     QPREFIX = "Would you say that: "
     INVALIDINPUT = "Invalid response. Please answer with 'y' (for yes) or 'n' (for no)."
