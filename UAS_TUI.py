@@ -30,7 +30,7 @@ if __name__ == '__main__':
 term = Terminal()
 
 ## [ CONFIGURATION ]
-VERSION = "1.0.1-TUI"
+VERSION = "1.0.2-TUI"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
 GRAPHDIR = os.path.join(ROOTDIR, 'GRAPH', 'TREE') # Sets directory for graphviz export(s)
@@ -52,7 +52,8 @@ if LANGUAGE == "FR":
     ENTERTHEBLUE = "Pressez une touche pour commencer."
     WELCOME = "Bienvenue dans le Uniqueness Assessment System (UAS). Le système va vous poser une série de questions afin d'évaluer votre unicité, veuillez répondre en pressant 'o' (pour oui)' ou 'n' (pour non). Vos réponses seront sauvegardées et ajoutées dans l'arbre à votre gauche ultérieurement."
     QMORE = "Quoi d'autre vous rends unique? "
-    QPREFIX = "Diriez-vous que: "
+    QPREFIX = "Diriez-vous que "
+    QSUFFIX = " vous rends unique?"
     INVALIDINPUT = "Réponse invalide, veuillez répondre en pressant 'o' (pour oui) ou 'n' (pour non)."
     TOOMANYERRORS = "Trop d'erreurs de saisie, le programme va redémarrer."
     FINISHER = "Merci. Vos réponses ont été sauvegardées et seront analysées."
@@ -111,7 +112,7 @@ def ask_question(nodepointer, errcount = 0):
     if nodepointer == 0:
         question = TREE[nodepointer].value
     else:
-        question = QPREFIX + TREE[nodepointer].value + "?"
+        question = QPREFIX + TREE[nodepointer].value + QSUFFIX
     with term.hidden_cursor():
         print(termprint((question)))
         with term.cbreak():
