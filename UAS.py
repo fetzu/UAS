@@ -1,10 +1,11 @@
 ### [ Uniqueness Assessment System (UAS) || Made by Julien 'fetzu' Bono for Le Salon's "Bleu, Sartre et ma mère" exhibition. ]
 ## [ CLI is cooler with docopt ]
 """
-Usage: UAS_TUI.py [-derst8]
+Usage: UAS_TUI.py [-cderst8]
   
   Options:
     -h --help
+    -c                CLI mode.
     -d                Dev mode: shows verbose output.
     -e                English mode.
     -r                Render mode. Render and show the loaded tree with graphviz.
@@ -20,17 +21,20 @@ import time
 import datetime
 from binarytree import Node, build
 from docopt import docopt
-from blessed import Terminal
 
 # Initializing docopt
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
-# Initializing Blessed's terminal
-term = Terminal()
+# Load TUI or CLI specific dependency accordingly
+if arguments['-c'] is False:
+    from blessed import Terminal
+    term = Terminal()
+else:
+    import readchar
 
 ## [ CONFIGURATION ]
-VERSION = "1.0.2-TUI"
+VERSION = "1.1.0"
 ROOTDIR = os.path.realpath(os.path.join(os.path.dirname(__file__)))
 EXPORTSDIR = os.path.join(ROOTDIR, 'EXPORTS') # Sets directory for SVG exports (NOTE: filename will also use format set by SAVESFILENAMEFORMAT)
 GRAPHDIR = os.path.join(ROOTDIR, 'GRAPH', 'TREE') # Sets directory for graphviz export(s)
@@ -67,7 +71,7 @@ if LANGUAGE == "EN":
     FINISHER = "Thank you. Your answers have been saved and will be evaluated."
 
 # Wrap the long welcome texts
-WELCOMEWARP = term.wrap(WELCOME)
+if arguments['-c'] is False: WELCOMEWARP = term.wrap(WELCOME)
 
 ## [ FILE HANDLING FUNCTIONS ]
 def tree_load():
@@ -113,10 +117,14 @@ def ask_question(nodepointer, errcount = 0):
         question = TREE[nodepointer].value
     else:
         question = QPREFIX + TREE[nodepointer].value + QSUFFIX
-    with term.hidden_cursor():
-        print(termprint((question)))
-        with term.cbreak():
-            answer = term.inkey()
+    if arguments['-c'] is False:
+        with term.hidden_cursor():
+            print(termprint((question)))
+            with term.cbreak():
+                answer = term.inkey()
+    else:
+        print(question)
+        answer = readchar.readchar()
     if answer in POSITIVEANSWERS or answer in NEGATIVEANSWERS:
         check_answer(answer, nodepointer)
     elif errcount == 2:
@@ -149,37 +157,31 @@ def check_answer(answer, nodepointer):
 def create_node(nodepointer, direction):
     """
     Prompts the user for a question and creates the approriate children to the node.
-    """   
-    answer = input(termprint(QMORE))
+    """
+    if arguments['-c'] is False:
+        answer = input(termprint(QMORE))
+    else:
+        answer = input(QMORE)
     if direction == "right":
         TREE[nodepointer].right = Node(answer)
     elif direction == "left":
         TREE[nodepointer].left = Node(answer)
     end_restart()
 
-def splashscreen():
-    """
-    Show the splashscreen and wait for enter to initialize
-    """
-    print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
-    with term.location(y=term.height // 2):
-        print(termprint(term.center(term.bold(ENTERTHEBLUE))))
-    with term.hidden_cursor():
-        with term.cbreak():
-            keypress = term.inkey()
-    if keypress == term.KEY_ENTER:
-        return
-
 def initialize():
     """
     Initialize the app by loading the latest save of the tree and clearing the screen.
     """
     TREE = tree_load()
-    print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
-    print(term.white_on_black(term.rjust(f"Uniqueness Assessment System (UAS) v{VERSION}")))
-    print(termprint(" "))
-    for line in WELCOMEWARP: print(line)
-    print(termprint(" "))
+    if arguments['-c'] is False:
+        print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
+        print(term.white_on_black(term.rjust(f"Uniqueness Assessment System (UAS) v{VERSION}")))
+        print(termprint(" "))
+        for line in WELCOMEWARP: print(line)
+        print(termprint(" "))
+    else:
+        os.system('clear')
+        print(WELCOME)
     return TREE
 
 def end_restart(graceful = 0):
@@ -190,25 +192,24 @@ def end_restart(graceful = 0):
     if graceful == 0:
         tree_save(TREE)
         if arguments['-t'] is True: print(TREE)
-        print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
-        with term.location(y=term.height // 2):
-            print(termprint(term.center(term.bold(FINISHER))))
-        with term.hidden_cursor():
+        if arguments['-c'] is False:
+            print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
+            with term.location(y=term.height // 2):
+                print(termprint(term.center(term.bold(FINISHER))))
+            with term.hidden_cursor():
+                time.sleep(10)
+        else:
+            print(FINISHER)
             time.sleep(10)
     else: 
-        print(termprint((TOOMANYERRORS)))
-        with term.hidden_cursor():
+        if arguments['-c'] is False:
+            print(termprint((TOOMANYERRORS)))
+            with term.hidden_cursor():
+                time.sleep(10)
+        else:
+            print(TOOMANYERRORS)
             time.sleep(10)
     main()
-
-def termprint(arg):
-    """
-    Print in color according to the argument "-8". Default to 24-bit colors, "16 colors" if -8 is passed.
-    """
-    if arguments['-8'] is True:
-        return term.white_on_blue(arg)
-    else:
-        return term.white_on_dodgerblue3(arg)
 
 def render_tree():
     """
@@ -233,10 +234,34 @@ def render_svg():
     save_file.close()
     if arguments['-d'] is True: print(f"Successfully exported svg of current tree to {svg_filename}")
 
+# TUI specific functions
+if arguments['-c'] is False:
+    def splashscreen():
+        """
+        Show the splashscreen and wait for enter to initialize
+        """
+        print(term.home + term.on_blue + term.clear) if arguments['-8'] is True else print(term.home + term.on_dodgerblue3 + term.clear)
+        with term.location(y=term.height // 2):
+            print(termprint(term.center(term.bold(ENTERTHEBLUE))))
+        with term.hidden_cursor():
+            with term.cbreak():
+                keypress = term.inkey()
+        if keypress == term.KEY_ENTER:
+            return
+        
+    def termprint(arg):
+        """
+        Print in color according to the argument "-8". Default to 24-bit colors, "16 colors" if -8 is passed.
+        """
+        if arguments['-8'] is True:
+            return term.white_on_blue(arg)
+        else:
+            return term.white_on_dodgerblue3(arg)
+
 ## [ MAIN ]
 def main():
     # Show splash screen
-    splashscreen()
+    if arguments['-c'] is False: splashscreen()
 
     # Initializes the session (incl. TUI)
     global TREE
